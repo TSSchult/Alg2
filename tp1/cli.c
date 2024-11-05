@@ -390,25 +390,4 @@ int main(){
     }
     destroi_vetores();
     return 0;
-
-
-
-//  preencher_vetor(v1, MAX_SIZE);
-
-//  printf("\n");
-
-//  clock_t t;
-//  t = clock();
-
-//  struct cont a = quicksort(v1, 0, MAX_SIZE - 1, 1);
-
-//  t = clock() - t;
-
-//  double tempo = ((double)t)/CLOCKS_PER_SEC*1000;
-
-//  mostra_intervalo(v1, MAX_SIZE, 4, 10, 1);
-
-//  printf("Tempo de execução: %.3f ms\n", tempo);
-//  printf("Comparações: %d  Trocas: %d\n\n", a.comp, a.trocas);
-
 }
