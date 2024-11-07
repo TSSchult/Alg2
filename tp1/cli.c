@@ -8,7 +8,7 @@
 
 #define MAX_SIZE 1024
 #define MAX_NUM 2048
-#define VEZES 1000 
+#define VEZES 10000 
 #define MAX_SLOTS 4 
 
 #define RED   "\x1B[31m"
@@ -89,7 +89,7 @@ void aloca_vetor(int **v){
 
 void cria_vetor(int slot) {
     char res;
-    if (slot < 0 || slot > 3) {
+    if (slot < 0 || slot > MAX_SLOTS - 1) {
         printf("Slot inválido, abortando");
         return;
     }
@@ -117,7 +117,7 @@ void mostra_intervalo(int slot, int ini, int fim){
         printf(RED "Intervalo inválido, abortando\n" RESET);
         return;
     }
-    if (slot < 0 || slot > 3){
+    if (slot < 0 || slot > MAX_SLOTS - 1){
         printf("Slot inválido, abortando");
         return;
     }
@@ -285,8 +285,8 @@ void benchmark(int op, int alg, int tipo, int slot){
 void roda_mil(int alg){
     struct cont res;
     clock_t t;
-    int *v = NULL, swaps[1000], com[1000];
-    double tempos[1000];
+    int *v = NULL, swaps[VEZES], com[VEZES];
+    double tempos[VEZES];
     aloca_vetor(&v);
     if (v == NULL){
         printf(RED"\nFalha na alocação! abortando...\n"RESET);
@@ -381,7 +381,7 @@ void imprime_opcoes(){
     printf("5 - Imprimir um intervalo       \n");
     printf("6 - Esvaziar vetor              \n");
     printf("7 - Limpar tela                 \n");
-    printf(RED "8 - Rodar 1000x             \n" RESET);
+    printf(RED "8 - Rodar %dx             \n" RESET, VEZES);
     printf("9 - Sair                        \n");
 }
 
@@ -513,9 +513,9 @@ void faz_escolha(){
             break;
         case 3:
             while(!ok){
-                printf("\nEm qual slot guardar o vetor[0-3]? ");
+                printf("\nEm qual slot guardar o vetor[0-%d]? ", MAX_SLOTS - 1);
                 scanf("%d", &slot);
-                if (slot < 0 || slot > 3)
+                if (slot < 0 || slot > MAX_SLOTS - 1)
                     printf(RED"\nSlot inválido, tente novamente\n"RESET);
                 else 
                     ok = 1;
@@ -524,18 +524,18 @@ void faz_escolha(){
             break;
         case 4:
             while(!ok){
-                printf("\nQual vetor gostaria de copiar[0-3]? ");
+                printf("\nQual vetor gostaria de copiar[0-%d]? ", MAX_SLOTS - 1);
                 scanf("%d", &orig);
-                if (orig < 0 || orig > 3 || vetores[orig] == NULL)
+                if (orig < 0 || orig > MAX_SLOTS - 1 || vetores[orig] == NULL)
                     printf(RED"\nSlot inválido, tente novamente\n"RESET);
                 else 
                     ok = 1;
             }
             ok = 0;
             while(!ok){
-                printf("\nPara qual vetor copiar[0-3]? ");
+                printf("\nPara qual vetor copiar[0-%d]? ", MAX_SLOTS - 1);
                 scanf("%d", &dest);
-                if (dest < 0 || dest > 3)
+                if (dest < 0 || dest > MAX_SLOTS - 1)
                     printf(RED"\nSlot inválido, tente novamente\n"RESET);
                 else 
                     ok = 1;
@@ -544,27 +544,27 @@ void faz_escolha(){
             break;
         case 5:
             while(!ok){
-                printf("\nQual vetor consultar[0-3]? ");
+                printf("\nQual vetor consultar[0-%d]? ", MAX_SLOTS - 1);
                 scanf("%d", &v);
-                if (v < 0 || v > 3 || vetores[v] == NULL)
+                if (v < 0 || v > MAX_SLOTS - 1 || vetores[v] == NULL)
                     printf(RED"\nSlot inválido, tente novamente\n"RESET);
                 else 
                     ok = 1;
             }
             ok = 0;
             while(!ok){
-                printf("\nDe qual posição[1-1024]? ");
+                printf("\nDe qual posição[1-%d]? ", MAX_SIZE);
                 scanf("%d", &orig);
-                if (orig < 1 || orig > 1024)
+                if (orig < 1 || orig > MAX_SIZE)
                     printf(RED"\nInício inválido, tente novamente\n"RESET);
                 else 
                     ok = 1;
             }
             ok = 0;
             while(!ok){
-                printf("\nAté que posição[%d-1024]? ", orig);
+                printf("\nAté que posição[%d-%d]? ", orig, MAX_SIZE);
                 scanf("%d", &dest);
-                if (dest < 1 || dest > 1024 || dest < orig)
+                if (dest < 1 || dest > MAX_SIZE || dest < orig)
                     printf(RED"\nFim inválido, tente novamente\n"RESET);
                 else 
                     ok = 1;
@@ -573,9 +573,9 @@ void faz_escolha(){
             break;
         case 6:
             while(!ok){
-                printf("\nQue vetor esvaziar[0-3]? ");
+                printf("\nQue vetor esvaziar[0-%d]? ", MAX_SLOTS - 1);
                 scanf("%d", &v);
-                if (v < 0 || v > 3 || vetores[v] == NULL)
+                if (v < 0 || v > MAX_SLOTS - 1 || vetores[v] == NULL)
                     printf(RED"\nSlot inválido, tente novamente\n"RESET);
                 else 
                     ok = 1;
@@ -592,7 +592,7 @@ void faz_escolha(){
         case 8:
             while(!ok){
                 algoritmos_escolhas();
-                printf("\nQual algoritmo gostaria de rodar 1000 vezes[1-12]? ");
+                printf("\nQual algoritmo gostaria de rodar %d vezes[1-12]? ", VEZES);
                 scanf("%d", &alg);
                 if (alg < 1 || alg > 12)
                     printf(RED"\nEscolha inválida, tente novamente\n"RESET);
@@ -609,9 +609,9 @@ void faz_escolha(){
     ok = 0;
     if (op == 1 || op == 2){
         while(!ok){
-            printf("\nEm qual vetor fazer a operação[0-3]? ");
+            printf("\nEm qual vetor fazer a operação[0-%d]? ", MAX_SLOTS - 1);
             scanf("%d", &v);
-            if (v < 0 || v > 3 || vetores[v] == NULL)
+            if (v < 0 || v > MAX_SLOTS - 1|| vetores[v] == NULL)
                 printf(RED"\nSlot inválido, tente novamente\n"RESET);
             else 
                 ok = 1;
