@@ -307,7 +307,7 @@ struct cont selectionSort(int v[], int tam){
 }
 
 struct cont buscaBin(int v[], int elem, int esq, int dir) {
-    struct cont c = {0, -1};  
+    struct cont c = {0, -2};  
     if (dir >= esq) {
         int meio = esq + (dir - esq) / 2;
         c.comp++;  
@@ -337,7 +337,7 @@ struct cont buscaBin(int v[], int elem, int esq, int dir) {
 
 
 struct cont buscaSeq(int v[], int elem, int tam) {
-    struct cont c = {0, -1};
+    struct cont c = {0, -2};
 
     for (int i = 0; i < tam; i++) {
         c.comp++;             

@@ -52,13 +52,13 @@ struct cont selectionSort(int v[], int tam);
 /* Procura por um item dentro do vetor v utilizando busca 
  * binaria, retorna uma  struct com o n° de comparacoes e 
  * no campo trocas  da struct o  indice do elemento, caso 
- * esse seja -1, o elemento nao existe no vetor*/
+ * esse seja -2, o elemento nao existe no vetor*/
 struct cont buscaBin(int v[], int elem, int esq, int dir);
 
 /* Procura por um item  dentro do vetor v utilizando busca 
  * sequencial (com sentinela), retorna uma struct com o n° 
  * de comparacoes e  no campo trocas da struct o indice do 
- * elemento, caso esse seja -1, a chave nao foi encontrada*/
+ * elemento, caso esse seja -2, a chave nao foi encontrada*/
 struct cont buscaSeq(int v[], int elem, int tam);
 
 #endif
