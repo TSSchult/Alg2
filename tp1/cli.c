@@ -8,7 +8,7 @@
 
 #define MAX_SIZE 1024
 #define MAX_NUM 2048
-#define VEZES 10000 
+#define VEZES 1000 
 #define MAX_SLOTS 4 
 
 #define RED   "\x1B[31m"
@@ -20,7 +20,7 @@
 #define WHT   "\x1B[37m"
 #define RESET "\x1B[0m"
 
-int out = 0;
+int out = 0, clean = 0;
 int *vetores[MAX_SLOTS] = {NULL};
 int ordenado[MAX_SLOTS] = {0};
 
@@ -71,6 +71,23 @@ void preencher_vetor(int slot){
         vetores[slot][i] = (rand() % MAX_NUM) + 1;
 }
 
+int get_answer(int min, int max, int check_exists){
+    int res = 0;
+    if (scanf("%d", &res) != 1) {  
+        printf(RED "\nEntrada inválida, tente novamente.\n\n" RESET);
+        while (getchar() != '\n');  
+    } 
+
+    if (res < min || res > max)
+        return -1;
+
+    if (check_exists)
+        if (vetores[res] == NULL)
+            return -2;
+    
+    return res;
+}
+
 int vetor_ordenado(int slot){
     for (int i = 0; i < MAX_SIZE - 1; i++)
         if (vetores[slot][i] > vetores[slot][i+1])
@@ -89,20 +106,17 @@ void aloca_vetor(int **v){
 
 void cria_vetor(int slot) {
     char res;
-    if (slot < 0 || slot > MAX_SLOTS - 1) {
-        printf("Slot inválido, abortando");
-        return;
-    }
     if (vetores[slot] != NULL){
         printf("\nSlot já ocupado, gostaria de sobrescrever [N/y]? ");
+        getchar();
         res = getchar();
         if (res == 'Y' || res == 'y'){
             preencher_vetor(slot);
             ordenado[slot] = 0;
-            printf("\nVetor sobrescrito");
+            printf(GRN"\nVetor sobrescrito\n"RESET);
         } 
         else {
-            printf("Operação abortada");
+            printf(RED"\nOperação abortada\n"RESET);
         }
         return;
     }
@@ -118,7 +132,7 @@ void mostra_intervalo(int slot, int ini, int fim){
         return;
     }
     if (slot < 0 || slot > MAX_SLOTS - 1){
-        printf("Slot inválido, abortando");
+        printf(RED"Slot inválido, abortando"RESET);
         return;
     }
     printf("[");
@@ -147,11 +161,21 @@ void imprime_vetores(){
     printf("\n");
 }
 
+void esvazia_vetor(int slot){
+    free(vetores[slot]);
+    vetores[slot] = NULL;
+}
+
+int todos_vazios(){
+    for (int i = 0; i < MAX_SLOTS; i++)
+        if (vetores[i] != NULL)
+            return 0;
+    return 1;
+}
+
 void destroi_vetores(){
-    for (int i = 0; i < MAX_SLOTS; i++){
-        free(vetores[i]);
-        vetores[i] = NULL;
-    }
+    for (int i = 0; i < MAX_SLOTS; i++)
+        esvazia_vetor(i);
 }
 
 void copia_vetor(int orig, int dest){
@@ -164,10 +188,6 @@ void copia_vetor(int orig, int dest){
     }
 }
 
-void esvazia_vetor(int slot){
-    free(vetores[slot]);
-    vetores[slot] = NULL;
-}
 
 void calcula_medias(int com[], double tempos[], int swaps[], double *m_te, 
                     double *m_c, double *m_tr, double *dp_te, double *dp_c,
@@ -254,10 +274,6 @@ void benchmark(int op, int alg, int tipo, int slot){
                 t = clock() - t;
                 break;
         }
-        if (!vetor_ordenado(slot))
-            printf(RED"\n\n\n VETOR NÃO ORDENADO"RESET);
-        else 
-            printf(GRN"\n\n\n VETOR OK"RESET);
         ordenado[slot] = 1;
         double tempo = ((double)t)/CLOCKS_PER_SEC*1000;
         imprime_escolha(alg, tipo, slot);
@@ -374,15 +390,15 @@ void roda_mil(int alg){
 
 void imprime_opcoes(){
     printf("Opções:\n");
-    printf("1 - Ordenar algum vetor         \n");
-    printf("2 - Buscar em algum vetor       \n");
-    printf("3 - Criar novo vetor aleatório  \n");
-    printf("4 - Copiar vetor em outro espaço\n");
-    printf("5 - Imprimir um intervalo       \n");
-    printf("6 - Esvaziar vetor              \n");
-    printf("7 - Limpar tela                 \n");
+    printf(GRN"1 - Ordenar algum vetor         \n");
+    printf(GRN"2 - Buscar em algum vetor       \n");
+    printf(YEL"3 - Criar novo vetor aleatório  \n");
+    printf(YEL"4 - Copiar vetor em outro espaço\n");
+    printf(YEL"5 - Imprimir um intervalo       \n");
+    printf(BLU"6 - Esvaziar vetor              \n");
+    printf(BLU"7 - Limpar tela                 \n");
     printf(RED "8 - Rodar %dx             \n" RESET, VEZES);
-    printf("9 - Sair                        \n");
+    printf("9 - Sair                        \n\n");
 }
 
 void ordena_escolhas(){
@@ -404,24 +420,24 @@ void quick_escolhas(){
 void shell_escolhas(){
     printf("\n1 - k = primos otimizados para 1024 elementos \n");
     printf("2 - k = 3k + 1                                  \n");
-    printf("3 - k = 2^n                                     \n");
+    printf("3 - k = 2^n                                     \n\n");
 }
 
 void busca_escolhas(){
     printf("\n1 - Busca Sequencial\n");
-    printf("2 - Busca Binária\n");
+    printf("2 - Busca Binária\n\n");
 }
 
 void algoritmos_escolhas(){
-    printf("\n1 - Quicksort (ultimo)\n");
-    printf("2 - Quicksort(primeiro)\n");
-    printf("3 - Quicksort(meio)\n");
-    printf("4 - Quicksort(mediana)\n");
-    printf("5 - Shellsort(custom)\n");
-    printf("6 - Shellsort(3k+1)\n");
-    printf("7 - Shellsort(2^n)\n");
-    printf("8 - BubbleSort\n");
-    printf("9 - InsertionSort\n");
+    printf("\n1 -  Quicksort (ultimo)\n");
+    printf("2 -  Quicksort(primeiro)\n");
+    printf("3 -  Quicksort(meio)\n");
+    printf("4 -  Quicksort(mediana)\n");
+    printf("5 -  Shellsort(custom)\n");
+    printf("6 -  Shellsort(3k+1)\n");
+    printf("7 -  Shellsort(2^n)\n");
+    printf("8 -  BubbleSort\n");
+    printf("9 -  InsertionSort\n");
     printf("10 - SelectionSort\n\n");
     printf("11 - Busca Sequencial\n");
     printf("12 - Busca Binária\n");
@@ -430,23 +446,22 @@ void algoritmos_escolhas(){
 void faz_escolha(){
     int op = 1, alg = 1, ok = 0, tipo = 1, slot = 0, orig, dest, v;
     while (!ok){
-        printf("\nO que você gostaria de fazer [1-9]? ");
-        scanf("%d", &op);
-        if (op < 1 || op > 9)
-            printf(RED "\nOperação inválida, tente novamente\n" RESET);
-        else 
+        printf("O que você gostaria de fazer [1-9]? ");
+        op = get_answer(1, 9, 0);
+        if (op != -1 && op != -2) 
             ok = 1;
-
     }
     ok = 0;
     switch (op){
         case 1:
+            if (todos_vazios()){
+                printf(RED"\nNão existem vetores para ordenar, abortando...\n\n"RESET);
+                return;
+            }
             while (!ok){
                 ordena_escolhas();
-                scanf("%d", &alg);
-                if (alg < 1 || alg > 5)
-                    printf(RED"\nAlgoritmo inválido, tente novamente\n"RESET);
-                else 
+                alg = get_answer(1, 5, 0);
+                if (alg != -1 && alg != -2)
                     ok = 1;
             }
             ok = 0;
@@ -455,10 +470,8 @@ void faz_escolha(){
                     quick_escolhas();
                     while (!ok){
                         printf("Qual tipo de pivô gostaria de utilizar[1-4]? ");
-                        scanf("%d", &tipo);
-                        if (tipo < 1 || tipo > 4)
-                            printf(RED"\nEscolha inválida, tente novamente\n"RESET);
-                        else 
+                        tipo = get_answer(1, 4, 0);
+                        if (tipo != -1 && tipo != -2)
                             ok = 1;
                     } 
                     break;
@@ -466,42 +479,39 @@ void faz_escolha(){
                     shell_escolhas();
                     while (!ok){
                         printf("Qual tipo de k gostaria de utilizar[1-3]? ");
-                        scanf("%d", &tipo);
-                        if (tipo < 1 || tipo > 3)
-                            printf(RED"\nEscolha inválida, tente novamente\n"RESET);
-                        else 
+                        tipo = get_answer(1, 3, 0);
+                        if (tipo != -1 && tipo != -2)
                             ok = 1;
                     }  
                     break;
             }
             break;
         case 2:
+            if (todos_vazios()){
+                printf(RED"\nNão existem vetores para buscar, abortando...\n\n"RESET);
+                return;
+            }
             busca_escolhas();
             while (!ok){
                 printf("\nQual tipo de busca gostaria de utilizar[1/2]? ");
-                scanf("%d", &alg); 
-                if (alg != 1 && alg != 2)
-                    printf(RED"\nEscolha inválida, tente novamente\n"RESET);
-                else 
+                alg = get_answer(1, 2, 0);
+                if (alg != -1 && alg != -2)
                     ok = 1;
             }
             ok = 0;
             while (!ok){
-                printf("\n1 - Número aleatório\n2 - Pesquisa customizada\n\nGostaria de escolher o valor a ser procurado[1/2]? ");
-                scanf("%d", &tipo); 
-                if (tipo != 1 && tipo != 2)
-                    printf(RED"\nEscolha inválida, tente novamente\n"RESET);
-                else 
+                printf("\n1 - Número aleatório\n2 - Pesquisa customizada\n \
+                       \nGostaria de escolher o valor a ser procurado[1/2]? ");
+                tipo = get_answer(1, 2, 0);
+                if (tipo != -1 && tipo != -2)
                     ok = 1;
             }
             ok = 0;
             while (!ok){
                 if (tipo == 2){
                     printf("\n\nPor qual número procurar[1-2048]? ");
-                    scanf("%d", &dest);
-                    if (dest < 1 || dest > 2048)
-                        printf(RED"\nEscolha inválida, tente novamente\n"RESET);
-                    else 
+                    dest = get_answer(1,MAX_NUM,0);
+                    if (dest != -1 && dest != -2)
                         ok = 1;
                 }
                 else {
@@ -514,89 +524,90 @@ void faz_escolha(){
         case 3:
             while(!ok){
                 printf("\nEm qual slot guardar o vetor[0-%d]? ", MAX_SLOTS - 1);
-                scanf("%d", &slot);
-                if (slot < 0 || slot > MAX_SLOTS - 1)
-                    printf(RED"\nSlot inválido, tente novamente\n"RESET);
-                else 
+                slot = get_answer(0,MAX_SLOTS - 1, 0);
+                if (slot != -1 && slot != -2)
                     ok = 1;
             }
             cria_vetor(slot);
             break;
         case 4:
+            if(todos_vazios()){
+                printf(RED"\nNenhum vetor para copiar :D\n\n"RESET);
+                return;
+            }
             while(!ok){
                 printf("\nQual vetor gostaria de copiar[0-%d]? ", MAX_SLOTS - 1);
-                scanf("%d", &orig);
-                if (orig < 0 || orig > MAX_SLOTS - 1 || vetores[orig] == NULL)
-                    printf(RED"\nSlot inválido, tente novamente\n"RESET);
-                else 
+                orig = get_answer(1, MAX_SLOTS - 1, 1);
+                if (orig != -1 && orig != -2)
                     ok = 1;
             }
             ok = 0;
             while(!ok){
                 printf("\nPara qual vetor copiar[0-%d]? ", MAX_SLOTS - 1);
-                scanf("%d", &dest);
-                if (dest < 0 || dest > MAX_SLOTS - 1)
-                    printf(RED"\nSlot inválido, tente novamente\n"RESET);
-                else 
+                dest = get_answer(0, MAX_SLOTS - 1, 0);
+                if (dest != -1 && dest != -2)
                     ok = 1;
             }
             copia_vetor(orig, dest);
             break;
         case 5:
+            if(todos_vazios()){
+                printf(RED"\nNenhum vetor para consultar :D\n\n"RESET);
+                return;
+            }
             while(!ok){
                 printf("\nQual vetor consultar[0-%d]? ", MAX_SLOTS - 1);
-                scanf("%d", &v);
-                if (v < 0 || v > MAX_SLOTS - 1 || vetores[v] == NULL)
-                    printf(RED"\nSlot inválido, tente novamente\n"RESET);
-                else 
+                v = get_answer(0, MAX_SLOTS - 1, 1);
+                if (v != -1 && v != -2)
                     ok = 1;
             }
             ok = 0;
             while(!ok){
                 printf("\nDe qual posição[1-%d]? ", MAX_SIZE);
-                scanf("%d", &orig);
-                if (orig < 1 || orig > MAX_SIZE)
-                    printf(RED"\nInício inválido, tente novamente\n"RESET);
-                else 
+                orig = get_answer(1, MAX_SIZE, 0);
+                if (orig != -1 && orig != -2)
                     ok = 1;
             }
             ok = 0;
             while(!ok){
                 printf("\nAté que posição[%d-%d]? ", orig, MAX_SIZE);
-                scanf("%d", &dest);
-                if (dest < 1 || dest > MAX_SIZE || dest < orig)
+                dest = get_answer(1, MAX_SIZE, 0);
+                if (dest < orig)
                     printf(RED"\nFim inválido, tente novamente\n"RESET);
-                else 
+                else if (dest != -1 && dest != -2)
                     ok = 1;
             }
+            printf("\n");
             mostra_intervalo(v, orig, dest);
+            printf("\n");
             break;
         case 6:
+            if(todos_vazios()){
+                printf(RED"\nNenhum vetor para esvaziar :D\n\n"RESET);
+                return;
+            }
             while(!ok){
                 printf("\nQue vetor esvaziar[0-%d]? ", MAX_SLOTS - 1);
-                scanf("%d", &v);
-                if (v < 0 || v > MAX_SLOTS - 1 || vetores[v] == NULL)
-                    printf(RED"\nSlot inválido, tente novamente\n"RESET);
-                else 
+                v = get_answer(0, MAX_SLOTS - 1, 0);
+                if (v != -1 && v != -2)
                     ok = 1;
             }
             if (vetores[v] == NULL)
-                printf("\nVetor já está vazio!");
+                printf(YEL"\nVetor já está vazio!\n" RESET);
             else 
                 esvazia_vetor(v);
             ordenado[v] = 0;
             break;
         case 7:
             system("clear");
+            clean = 1;
             break;
         case 8:
             while(!ok){
                 algoritmos_escolhas();
                 printf("\nQual algoritmo gostaria de rodar %d vezes[1-12]? ", VEZES);
-                scanf("%d", &alg);
-                if (alg < 1 || alg > 12)
-                    printf(RED"\nEscolha inválida, tente novamente\n"RESET);
-                else 
+                alg = get_answer(1, 12, 0);
+                if (alg != -1 && alg != -2)
                     ok = 1;
             }
             roda_mil(alg);
@@ -610,10 +621,8 @@ void faz_escolha(){
     if (op == 1 || op == 2){
         while(!ok){
             printf("\nEm qual vetor fazer a operação[0-%d]? ", MAX_SLOTS - 1);
-            scanf("%d", &v);
-            if (v < 0 || v > MAX_SLOTS - 1|| vetores[v] == NULL)
-                printf(RED"\nSlot inválido, tente novamente\n"RESET);
-            else 
+            v = get_answer(0, MAX_SLOTS - 1, 1);
+            if (v != -1 && v != -2)
                 ok = 1;
         }
         if (op == 2 && alg == 2 && !ordenado[v]){
@@ -628,16 +637,20 @@ int main(){
     srand(time(NULL));
     cria_vetor(0);
     preencher_vetor(0);
+    system("clear");
     while (!out){
         imprime_vetores();
         imprime_opcoes();
         faz_escolha();
         if (out) break;
-        printf("Gostaria de limpar a tela[y/N]? ");
-        getchar();
-        char c = getchar();
-        if (c == 'y' || c == 'Y')
-            system("clear");
+        if (!clean){
+            printf("Gostaria de limpar a tela[y/N]? ");
+            getchar();
+            char c = getchar();
+            if (c == 'y' || c == 'Y')
+                system("clear");
+            clean = 0;
+        }
     }
     destroi_vetores();
     return 0;

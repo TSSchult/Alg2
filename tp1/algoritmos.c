@@ -55,7 +55,7 @@ int p_ini(int v[], int esq, int dir, struct cont *c) {
     int pivo = v[esq];
     int i = esq + 1;
 
-    for (int j = esq + 1; j < dir; j++) {
+    for (int j = esq + 1; j <= dir; j++) {
         c->comp += 2; 
         if (v[j] < pivo) {
             swap(&v[i], &v[j], c);
