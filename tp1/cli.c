@@ -66,11 +66,6 @@ void desenhar_quadro(int comp, double tempo, int trocas, int larg, int op,
     printf("┘\n");
 }
 
-void preencher_vetor(int slot){
-    for (int i = 0; i < MAX_SIZE; i++)
-        vetores[slot][i] = (rand() % MAX_NUM) + 1;
-}
-
 int get_answer(int min, int max, int check_exists){
     int res = 0;
     if (scanf("%d", &res) != 1) {  
@@ -86,6 +81,37 @@ int get_answer(int min, int max, int check_exists){
             return -2;
     
     return res;
+}
+
+void mostra_intervalo(int slot, int ini, int fim){
+    if (fim < ini || fim > MAX_SIZE || ini > MAX_SIZE) {
+        printf(RED "Intervalo inválido, abortando\n" RESET);
+        return;
+    }
+    if (slot < 0 || slot > MAX_SLOTS - 1){
+        printf(RED"Slot inválido, abortando"RESET);
+        return;
+    }
+    printf("[");
+    if (ini != 1){
+        printf("... ");
+    }
+    if (vetores[slot] != NULL){
+        for (int i = ini-1; i < fim-1; i++){
+            printf("%d, ", vetores[slot][i]);
+        }
+        printf("%d", vetores[slot][fim-1]);
+        if (fim != MAX_SIZE){
+            printf(", ...");
+        }
+    }
+    else printf(" ");
+    printf("]\n");
+}
+
+void preencher_vetor(int slot){
+    for (int i = 0; i < MAX_SIZE; i++)
+        vetores[slot][i] = (rand() % MAX_NUM) + 1;
 }
 
 int vetor_ordenado(int slot){
@@ -126,32 +152,6 @@ void cria_vetor(int slot) {
     preencher_vetor(slot);
 }
 
-void mostra_intervalo(int slot, int ini, int fim){
-    if (fim < ini || fim > MAX_SIZE || ini > MAX_SIZE) {
-        printf(RED "Intervalo inválido, abortando\n" RESET);
-        return;
-    }
-    if (slot < 0 || slot > MAX_SLOTS - 1){
-        printf(RED"Slot inválido, abortando"RESET);
-        return;
-    }
-    printf("[");
-    if (ini != 1){
-        printf("... ");
-    }
-    if (vetores[slot] != NULL){
-        for (int i = ini-1; i < fim-1; i++){
-            printf("%d, ", vetores[slot][i]);
-        }
-        printf("%d", vetores[slot][fim-1]);
-        if (fim != MAX_SIZE){
-            printf(", ...");
-        }
-    }
-    else printf(" ");
-    printf("]\n");
-}
-
 void imprime_vetores(){
     printf("Vetores:\n");
     for (int i = 0; i < MAX_SLOTS; i++){
@@ -188,6 +188,27 @@ void copia_vetor(int orig, int dest){
     }
 }
 
+void imprime_escolha(int alg, int tipo, int slot){
+    printf("\nExecutando ");
+    if (alg == 1) {
+        printf("Quicksort ");
+        if (tipo == 1) printf("com o pivô sendo o último elemento ");
+        if (tipo == 2) printf("com o pivô sendo o primeiro elemento ");
+        if (tipo == 3) printf("com o pivô sendo o elemento do meio");
+        if (tipo == 4) printf("com o pivô sendo a mediana");
+    }
+    if (alg == 2) {
+        printf("Shellsort ");
+        if (tipo == 1) printf("com o espaçamento customizado");
+        if (tipo == 2) printf("com o espacamento 3k + 1");
+        if (tipo == 3) printf("com o espacamento 2^n");
+    }
+    if (alg == 3) printf("Bubblesort ");
+    if (alg == 4) printf("Insertsort ");
+    if (alg == 5) printf("Selectionsort ");
+
+    printf("no vetor número %d:\n", slot);
+}
 
 void calcula_medias(int com[], double tempos[], int swaps[], double *m_te, 
                     double *m_c, double *m_tr, double *dp_te, double *dp_c,
@@ -219,28 +240,6 @@ void calcula_medias(int com[], double tempos[], int swaps[], double *m_te,
     *dp_c = sqrt(*dp_c);
     *dp_te = sqrt(*dp_te);
     *dp_tr = sqrt(*dp_tr);
-}
-
-void imprime_escolha(int alg, int tipo, int slot){
-    printf("\nExecutando ");
-    if (alg == 1) {
-        printf("Quicksort ");
-        if (tipo == 1) printf("com o pivô sendo o último elemento ");
-        if (tipo == 2) printf("com o pivô sendo o primeiro elemento ");
-        if (tipo == 3) printf("com o pivô sendo o elemento do meio");
-        if (tipo == 4) printf("com o pivô sendo a mediana");
-    }
-    if (alg == 2) {
-        printf("Shellsort ");
-        if (tipo == 1) printf("com o espaçamento customizado");
-        if (tipo == 2) printf("com o espacamento 3k + 1");
-        if (tipo == 3) printf("com o espacamento 2^n");
-    }
-    if (alg == 3) printf("Bubblesort ");
-    if (alg == 4) printf("Insertsort ");
-    if (alg == 5) printf("Selectionsort ");
-
-    printf("no vetor número %d:\n", slot);
 }
 
 void benchmark(int op, int alg, int tipo, int slot){
