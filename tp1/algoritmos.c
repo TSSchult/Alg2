@@ -7,6 +7,7 @@ int primos[] = {
     511, 256, 127, 53, 23, 11, 3, 1
 };
 
+// troca 2 inteiros e atualiza a contagem 
 void swap(int *a, int *b, struct cont *c) {
     int temp = *a;
     *a = *b;
@@ -14,6 +15,7 @@ void swap(int *a, int *b, struct cont *c) {
     c->trocas++;  
 }
 
+// retorna a mediana entre 3 inteiros
 int getmiddle(int v[], int a, int b, int c) {
     if (v[a] > v[b]) {
         if (v[b] > v[c]) {
@@ -34,6 +36,8 @@ int getmiddle(int v[], int a, int b, int c) {
     }
 }
 
+// funcao de particionamento para o quicksort. Toma 
+// como pivo o ultimo elemento de um sub-vetor
 int p_ult(int v[], int esq, int dir, struct cont *c) {
     int pivo = v[dir];
     int i = esq - 1;
@@ -51,6 +55,8 @@ int p_ult(int v[], int esq, int dir, struct cont *c) {
     return (i + 1);
 }
 
+// funcao de particionamento para o quicksort. Toma 
+// como pivo o primeiro elemento de um sub-vetor
 int p_ini(int v[], int esq, int dir, struct cont *c) {
     int pivo = v[esq];
     int i = esq + 1;
@@ -68,6 +74,8 @@ int p_ini(int v[], int esq, int dir, struct cont *c) {
     return (i - 1);
 }
 
+// funcao de particionamento para o quicksort. Toma 
+// como pivo o elemento do meio de um sub-vetor
 int p_meio(int v[], int esq, int dir, struct cont *c) {
     int meio = esq + (dir - esq) / 2;
     int pivo = v[meio];
@@ -87,6 +95,8 @@ int p_meio(int v[], int esq, int dir, struct cont *c) {
     return (i + 1);
 }
 
+// funcao de particionamento para o quicksort. Toma como 
+// pivo a mediana entre 3 elementos aleatorios de um sub-vetor
 int p_medi(int v[], int esq, int dir, struct cont *c) {
     int x = esq + rand() % (dir - esq + 1);
     int y = esq + rand() % (dir - esq + 1);
@@ -111,6 +121,8 @@ int p_medi(int v[], int esq, int dir, struct cont *c) {
     return (i + 1);
 }
 
+// funcao de controle do quicksort. Escolhe entre o tipo de particionamento
+// e mantém a contagem das comparacoes e trocas feitas
 struct cont quicksort(int v[], int esq, int dir, int tipo) {
     struct cont c = {0,0};  
 
@@ -144,6 +156,7 @@ struct cont quicksort(int v[], int esq, int dir, int tipo) {
     return c;
 }
 
+// executa o shellsort com primos otimizados para 1024 elementos
 struct cont shellsort_primos(int v[], int tam){
     struct cont c = {0,0};
     int num = sizeof(primos) / sizeof(primos[0]);
@@ -173,6 +186,7 @@ struct cont shellsort_primos(int v[], int tam){
     return c;
 }
 
+// executa o shellsort utilizando k = 3k + 1 como gerador de espacamentos
 struct cont shellsort_3kmais1(int v[], int tam) {
     struct cont c = {0,0};
     int i, j, aux;
@@ -204,6 +218,7 @@ struct cont shellsort_3kmais1(int v[], int tam) {
     return c;
 }
 
+// executa o shellsort com potencias de 2 como espacamento
 struct cont shellsort_pot2(int v[], int tam){
 
     struct cont c = {0,0};
@@ -236,6 +251,7 @@ struct cont shellsort_pot2(int v[], int tam){
     return c;
 }
 
+// funcao unificadora do shellsort para escolher o tipo
 struct cont shellsort(int v[], int tam, int tipo){
     switch (tipo){
         case 1:

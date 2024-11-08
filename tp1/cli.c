@@ -6,11 +6,12 @@
 #include <math.h>
 #include "algoritmos.h"
 
-#define MAX_SIZE 1024
-#define MAX_NUM 2048
-#define VEZES 1000 
-#define MAX_SLOTS 4 
+#define MAX_SIZE 1024     //tamanho dos vetores que são alocados
+#define MAX_NUM 2048      //numero maximo permitido no vetor
+#define VEZES 1000        //quantas vezes o algoritmo será executado
+#define MAX_SLOTS 4       //quantos espacos de vetor existem
 
+// defines para cores em strings
 #define RED   "\x1B[31m"
 #define GRN   "\x1B[32m"
 #define YEL   "\x1B[33m"
@@ -20,22 +21,31 @@
 #define WHT   "\x1B[37m"
 #define RESET "\x1B[0m"
 
-int out = 0, clean = 0;
-int *vetores[MAX_SLOTS] = {NULL};
-int ordenado[MAX_SLOTS] = {0};
+// veriaveis globais para facil acesso, dessa maneira todos 
+// os vetores estão visiveis, descomplicando a passagem de parametros
+static int out = 0, clean = 0;
+static int *vetores[MAX_SLOTS] = {NULL};
+static int ordenado[MAX_SLOTS] = {0};
 
+// procedimento que desenha um quadro ao redor das estatisticas para cada 
+// algoritmo o texto fica centralizado independentemente do resultado obtido
 void desenhar_quadro(int comp, double tempo, int trocas, int larg, int op, 
                      int medias,double dp_comp, double dp_tempo, 
                      double dp_trocas) {
     char b_comp[larg], b_tempo[larg], b_trocas[larg];
 
+    //formatacao do texto
     if (medias){
-        snprintf(b_comp, sizeof(b_comp), "Comparações: %d +- %.2f", comp, dp_comp);
-        snprintf(b_tempo, sizeof(b_tempo), "Tempo: %.3f +- %.2fms", tempo, dp_tempo);
+        snprintf(b_comp, sizeof(b_comp),
+                 "Comparações: %d +- %.2f", comp, dp_comp);
+        snprintf(b_tempo, sizeof(b_tempo),
+                 "Tempo: %.3f +- %.2fms", tempo, dp_tempo);
         if (op == 1)
-            snprintf(b_trocas, sizeof(b_trocas), "Trocas: %d +- %.2f", trocas, dp_trocas);
+            snprintf(b_trocas, sizeof(b_trocas),
+                     "Trocas: %d +- %.2f", trocas, dp_trocas);
         else
-            snprintf(b_trocas, sizeof(b_trocas), "Casa: %d +- %.2f", trocas, dp_trocas);
+            snprintf(b_trocas, sizeof(b_trocas),
+                     "Casa: %d +- %.2f", trocas, dp_trocas);
     }
     else {
         snprintf(b_comp, sizeof(b_comp), "Comparações: %d", comp);
@@ -47,18 +57,23 @@ void desenhar_quadro(int comp, double tempo, int trocas, int larg, int op,
 
     }
 
+    //padding de cada comprimento de texto
     int p_comp = (larg - (int)strlen(b_comp) - 2) / 2;
     int p_tempo = (larg - (int)strlen(b_tempo) - 2) / 2;
     int p_trocas = (larg - (int)strlen(b_trocas) - 2) / 2;
 
+    // inicio da impressão
     printf("┌");
     for (int i = 0; i < larg - 2; i++) printf("─");
     printf("┐\n");
 
     printf("│%*s│\n", larg - 2, "");
-    printf("│ "GRN"%*s%s%*s"RESET"│\n", p_comp, "", b_comp, larg - p_comp - (int)strlen(b_comp) - 1, "");
-    printf("│"YEL"%*s%s%*s"RESET"│\n", p_trocas, "", b_trocas, larg - p_trocas - (int)strlen(b_trocas) - 2, "");
-    printf("│"BLU"%*s%s%*s"RESET"│\n", p_tempo, "", b_tempo, larg - p_tempo - (int)strlen(b_tempo) - 2, "");
+    printf("│ "GRN"%*s%s%*s"RESET"│\n", p_comp, "", b_comp,
+           larg - p_comp - (int)strlen(b_comp) - 1, "");
+    printf("│"YEL"%*s%s%*s"RESET"│\n", p_trocas, "", b_trocas,
+           larg - p_trocas - (int)strlen(b_trocas) - 2, "");
+    printf("│"BLU"%*s%s%*s"RESET"│\n", p_tempo, "", b_tempo, 
+           larg - p_tempo - (int)strlen(b_tempo) - 2, "");
     printf("│%*s│\n", larg - 2, "");
 
     printf("└");
@@ -66,6 +81,9 @@ void desenhar_quadro(int comp, double tempo, int trocas, int larg, int op,
     printf("┘\n");
 }
 
+// funcao para receber uma resposta do usuário. Observa por entradas invalidas
+// checando o valor de retorno do scanf e por limites de valor minimo e maximo
+// aceitos. Também, se necessário, checa se o vetor sendo chamado existe.
 int get_answer(int min, int max, int check_exists){
     int res = 0;
     if (scanf("%d", &res) != 1) {  
@@ -83,6 +101,8 @@ int get_answer(int min, int max, int check_exists){
     return res;
 }
 
+// funcao para mostrar um intervalo no vetor. Caso o inicio não seja o primeiro
+// ou o ultimo elemento, adiciona (...) para indicar que há mais elementos
 void mostra_intervalo(int slot, int ini, int fim){
     if (fim < ini || fim > MAX_SIZE || ini > MAX_SIZE) {
         printf(RED "Intervalo inválido, abortando\n" RESET);
@@ -93,34 +113,39 @@ void mostra_intervalo(int slot, int ini, int fim){
         return;
     }
     printf("[");
-    if (ini != 1){
+    if (ini != 1)
         printf("... ");
-    }
+
     if (vetores[slot] != NULL){
-        for (int i = ini-1; i < fim-1; i++){
+        for (int i = ini-1; i < fim-1; i++)
             printf("%d, ", vetores[slot][i]);
-        }
+
         printf("%d", vetores[slot][fim-1]);
-        if (fim != MAX_SIZE){
+
+        if (fim != MAX_SIZE)
             printf(", ...");
-        }
     }
     else printf(" ");
+
     printf("]\n");
 }
 
+// preenche um vetor com numeros aleatórios de 1 até MAX_NUM
 void preencher_vetor(int slot){
     for (int i = 0; i < MAX_SIZE; i++)
         vetores[slot][i] = (rand() % MAX_NUM) + 1;
 }
 
+// checa se o vetor está realmente ordenado
 int vetor_ordenado(int slot){
     for (int i = 0; i < MAX_SIZE - 1; i++)
         if (vetores[slot][i] > vetores[slot][i+1])
             return 0;
+
     return 1;
 }
 
+// cria e/ou aloca um vetor e o preenche de numeros aleatorios
 void aloca_vetor(int **v){
     if (*v == NULL)
         *v = malloc(MAX_SIZE * sizeof(int));
@@ -130,20 +155,22 @@ void aloca_vetor(int **v){
             (*v)[i] = (rand() % MAX_NUM) + 1; 
 }
 
+// faz a checagem de existencia de um vetor e pergunta para o usuário se, caso 
+// o vetor ja exista, se quer sobrescrevê-lo
 void cria_vetor(int slot) {
     char res;
     if (vetores[slot] != NULL){
         printf("\nSlot já ocupado, gostaria de sobrescrever [N/y]? ");
         getchar();
         res = getchar();
+
         if (res == 'Y' || res == 'y'){
             preencher_vetor(slot);
             ordenado[slot] = 0;
             printf(GRN"\nVetor sobrescrito\n"RESET);
         } 
-        else {
-            printf(RED"\nOperação abortada\n"RESET);
-        }
+        else printf(RED"\nOperação abortada\n"RESET);
+
         return;
     }
 
@@ -152,42 +179,49 @@ void cria_vetor(int slot) {
     preencher_vetor(slot);
 }
 
+// funcao para imprimir os vetores que estão no menu
 void imprime_vetores(){
     printf("Vetores:\n");
+
     for (int i = 0; i < MAX_SLOTS; i++){
         printf("%d - ", i);
         mostra_intervalo(i, 1, 10);
     }
+
     printf("\n");
 }
 
+// libera e aterra um slot de vetor
 void esvazia_vetor(int slot){
     free(vetores[slot]);
     vetores[slot] = NULL;
 }
 
+// observa se todos os slots estão vazios
 int todos_vazios(){
     for (int i = 0; i < MAX_SLOTS; i++)
         if (vetores[i] != NULL)
             return 0;
+
     return 1;
 }
 
+// libera e aterra todos os vetores
 void destroi_vetores(){
     for (int i = 0; i < MAX_SLOTS; i++)
         esvazia_vetor(i);
 }
 
+// copia o vetor de um slot para outro
 void copia_vetor(int orig, int dest){
-    if (vetores[dest] == NULL){
+    if (vetores[dest] == NULL)
         cria_vetor(dest);
-    }
 
-    for (int i = 0; i < MAX_SIZE; i++){
+    for (int i = 0; i < MAX_SIZE; i++)
         vetores[dest][i] = vetores[orig][i];
-    }
 }
 
+// adiciona mensagens explicando a operação sendo executada
 void imprime_escolha(int alg, int tipo, int slot){
     printf("\nExecutando ");
     if (alg == 1) {
@@ -210,20 +244,26 @@ void imprime_escolha(int alg, int tipo, int slot){
     printf("no vetor número %d:\n", slot);
 }
 
+// calcula a media e o desvio padrao após rodar um algoritmo VEZES vezes
 void calcula_medias(int com[], double tempos[], int swaps[], double *m_te, 
                     double *m_c, double *m_tr, double *dp_te, double *dp_c,
                     double *dp_tr){
     long long n_c = 0, n_tr = 0;
     double n_te = 0;
+
+    // calcula total de comparacoes, tempo e trocas
     for (int i = 0; i < VEZES; i++){
         n_c += com[i];
         n_te += tempos[i];
         n_tr += swaps[i];
     }
+
+    //faz a média
     *m_c = (double)n_c / VEZES;
     *m_te = n_te / VEZES;
     *m_tr = (double)n_tr / VEZES;
 
+    // calcula o desvio padrão de cada estatística
     double aux = 0;
     for (int i = 0; i < VEZES; i++){
         aux = com[i] - *m_c;
@@ -242,6 +282,7 @@ void calcula_medias(int com[], double tempos[], int swaps[], double *m_te,
     *dp_tr = sqrt(*dp_tr);
 }
 
+// executa os algoritmos e imprime o resultado
 void benchmark(int op, int alg, int tipo, int slot){
     struct cont res;
     clock_t t;
@@ -279,6 +320,7 @@ void benchmark(int op, int alg, int tipo, int slot){
         desenhar_quadro(res.comp, tempo, res.trocas, 30, op, 0,0,0,0);
         return;
     }
+
     if (tipo == 0)
         tipo = (rand() % MAX_NUM) + 1;
 
@@ -287,26 +329,32 @@ void benchmark(int op, int alg, int tipo, int slot){
         t = clock();
         res = buscaSeq(vetores[slot], tipo, MAX_SIZE);
         t = clock() - t;
-    } else {
+    } 
+    else {
         printf("Procurando pelo número %d com busca binária:\n", tipo);
         t = clock();
         res = buscaBin(vetores[slot], tipo, 0, MAX_SIZE - 1);
         t = clock() - t;
     }
+    
     double tempo = ((double)t)/CLOCKS_PER_SEC*1000;
     desenhar_quadro(res.comp, tempo, res.trocas + 1, 30, op,0,0,0,0);
 }
 
+// executa um algoritmo VEZES vezes, chama 
+// a funcao de medias e imprime o resultado
 void roda_mil(int alg){
     struct cont res;
     clock_t t;
     int *v = NULL, swaps[VEZES], com[VEZES];
     double tempos[VEZES];
     aloca_vetor(&v);
+
     if (v == NULL){
         printf(RED"\nFalha na alocação! abortando...\n"RESET);
         return;
     }
+
     for (int i = 0; i < VEZES; i++){
         aloca_vetor(&v);
         switch (alg){
@@ -377,16 +425,20 @@ void roda_mil(int alg){
         swaps[i] = res.trocas;
         com[i] = res.comp;
     }
+
     double m_te=0, m_c=0, m_tr=0, dp_te=0, dp_c=0, dp_tr=0; 
     calcula_medias(com, tempos, swaps, &m_te, &m_c, 
                    &m_tr, &dp_te, &dp_c, &dp_tr);
+
     int op = 1;
     if (alg == 11 || alg == 12) op = 0;
+
     printf("\nResultados:\n");
     desenhar_quadro(m_c, m_te, m_tr, 42, op, 1, dp_c, dp_te, dp_tr);
     free(v);
 }
 
+// imprime as opcoes de menu
 void imprime_opcoes(){
     printf("Opções:\n");
     printf(GRN"1 - Ordenar algum vetor         \n");
@@ -400,6 +452,7 @@ void imprime_opcoes(){
     printf("9 - Sair                        \n\n");
 }
 
+// quando a escolha foi ordenacao, imprime os algoritmos implementados
 void ordena_escolhas(){
     printf("\n1 - Quicksort\n");
     printf("2 - Shellsort\n");
@@ -409,6 +462,7 @@ void ordena_escolhas(){
     printf("Qual algoritmo gostaria de utilizar [1-5]? ");
 }
 
+// quando o usuario escolhe o quicksort, imprime as opcoes de pivô
 void quick_escolhas(){
     printf("\n1 - Pivô é o último elemento        \n");
     printf("2 - Pivô é o primeiro elemento      \n");
@@ -416,17 +470,20 @@ void quick_escolhas(){
     printf("4 - Pivô é a mediana entre 3      \n\n");
 }
 
+// quando o usuário escolhe shellsort, imprime as opcoes de espacamento
 void shell_escolhas(){
     printf("\n1 - k = primos otimizados para 1024 elementos \n");
     printf("2 - k = 3k + 1                                  \n");
     printf("3 - k = 2^n                                     \n\n");
 }
 
+// imprime os tipos de busca aceitos
 void busca_escolhas(){
     printf("\n1 - Busca Sequencial\n");
     printf("2 - Busca Binária\n\n");
 }
 
+// quando o usuario quer rodar VEZES vezes, imprime os algoritmos possiveis
 void algoritmos_escolhas(){
     printf("\n1 -  Quicksort (ultimo)\n");
     printf("2 -  Quicksort(primeiro)\n");
@@ -442,8 +499,11 @@ void algoritmos_escolhas(){
     printf("12 - Busca Binária\n");
 }
 
+// procedimento de controle do menu, faz toda a arvore de escolhas e 
+// chama as funcoes para execução do algoritmo corretamente
 void faz_escolha(){
     int op = 1, alg = 1, ok = 0, tipo = 1, slot = 0, orig, dest, v;
+
     while (!ok){
         printf("O que você gostaria de fazer [1-9]? ");
         op = get_answer(1, 9, 0);
@@ -451,12 +511,14 @@ void faz_escolha(){
             ok = 1;
     }
     ok = 0;
+
     switch (op){
         case 1:
             if (todos_vazios()){
-                printf(RED"\nNão existem vetores para ordenar, abortando...\n\n"RESET);
+                printf(RED"\nNão existem vetores para ordenar\n\n"RESET);
                 return;
             }
+
             while (!ok){
                 ordena_escolhas();
                 alg = get_answer(1, 5, 0);
@@ -464,6 +526,7 @@ void faz_escolha(){
                     ok = 1;
             }
             ok = 0;
+
             switch (alg){
                 case 1:
                     quick_escolhas();
@@ -474,6 +537,7 @@ void faz_escolha(){
                             ok = 1;
                     } 
                     break;
+
                 case 2:
                     shell_escolhas();
                     while (!ok){
@@ -485,11 +549,13 @@ void faz_escolha(){
                     break;
             }
             break;
+
         case 2:
             if (todos_vazios()){
-                printf(RED"\nNão existem vetores para buscar, abortando...\n\n"RESET);
+                printf(RED"\nNão existem vetores para buscar\n\n"RESET);
                 return;
             }
+
             busca_escolhas();
             while (!ok){
                 printf("\nQual tipo de busca gostaria de utilizar[1/2]? ");
@@ -498,6 +564,7 @@ void faz_escolha(){
                     ok = 1;
             }
             ok = 0;
+
             while (!ok){
                 printf("\n1 - Número aleatório\n2 - Pesquisa customizada\n \
                        \nGostaria de escolher o valor a ser procurado[1/2]? ");
@@ -506,6 +573,7 @@ void faz_escolha(){
                     ok = 1;
             }
             ok = 0;
+
             while (!ok){
                 if (tipo == 2){
                     printf("\n\nPor qual número procurar[1-2048]? ");
@@ -520,6 +588,7 @@ void faz_escolha(){
             }
             tipo = dest;
             break;
+
         case 3:
             while(!ok){
                 printf("\nEm qual slot guardar o vetor[0-%d]? ", MAX_SLOTS - 1);
@@ -529,18 +598,21 @@ void faz_escolha(){
             }
             cria_vetor(slot);
             break;
+
         case 4:
             if(todos_vazios()){
                 printf(RED"\nNenhum vetor para copiar :D\n\n"RESET);
                 return;
             }
+
             while(!ok){
-                printf("\nQual vetor gostaria de copiar[0-%d]? ", MAX_SLOTS - 1);
+                printf("\nQual vetor gostaria de copiar[0-%d]? ", MAX_SLOTS-1);
                 orig = get_answer(1, MAX_SLOTS - 1, 1);
                 if (orig != -1 && orig != -2)
                     ok = 1;
             }
             ok = 0;
+
             while(!ok){
                 printf("\nPara qual vetor copiar[0-%d]? ", MAX_SLOTS - 1);
                 dest = get_answer(0, MAX_SLOTS - 1, 0);
@@ -549,11 +621,13 @@ void faz_escolha(){
             }
             copia_vetor(orig, dest);
             break;
+
         case 5:
             if(todos_vazios()){
                 printf(RED"\nNenhum vetor para consultar :D\n\n"RESET);
                 return;
             }
+
             while(!ok){
                 printf("\nQual vetor consultar[0-%d]? ", MAX_SLOTS - 1);
                 v = get_answer(0, MAX_SLOTS - 1, 1);
@@ -561,6 +635,7 @@ void faz_escolha(){
                     ok = 1;
             }
             ok = 0;
+
             while(!ok){
                 printf("\nDe qual posição[1-%d]? ", MAX_SIZE);
                 orig = get_answer(1, MAX_SIZE, 0);
@@ -568,6 +643,7 @@ void faz_escolha(){
                     ok = 1;
             }
             ok = 0;
+
             while(!ok){
                 printf("\nAté que posição[%d-%d]? ", orig, MAX_SIZE);
                 dest = get_answer(1, MAX_SIZE, 0);
@@ -576,31 +652,37 @@ void faz_escolha(){
                 else if (dest != -1 && dest != -2)
                     ok = 1;
             }
+
             printf("\n");
             mostra_intervalo(v, orig, dest);
             printf("\n");
             break;
+
         case 6:
             if(todos_vazios()){
                 printf(RED"\nNenhum vetor para esvaziar :D\n\n"RESET);
                 return;
             }
+
             while(!ok){
                 printf("\nQue vetor esvaziar[0-%d]? ", MAX_SLOTS - 1);
                 v = get_answer(0, MAX_SLOTS - 1, 0);
                 if (v != -1 && v != -2)
                     ok = 1;
             }
+
             if (vetores[v] == NULL)
                 printf(YEL"\nVetor já está vazio!\n" RESET);
             else 
                 esvazia_vetor(v);
             ordenado[v] = 0;
             break;
+
         case 7:
             system("clear");
             clean = 1;
             break;
+
         case 8:
             while(!ok){
                 algoritmos_escolhas();
@@ -611,6 +693,7 @@ void faz_escolha(){
             }
             roda_mil(alg);
             break;
+
         case 9:
             out = 1;
             printf(GRN"Bye!\n\n"RESET);
@@ -632,25 +715,33 @@ void faz_escolha(){
     }
 }
 
+// funcao pricipal que repete o menu de escolhas o usuário quiser sair
 int main(){
     srand(time(NULL));
     cria_vetor(0);
     preencher_vetor(0);
+
     system("clear");
+
     while (!out){
         imprime_vetores();
         imprime_opcoes();
         faz_escolha();
+
         if (out) break;
+
         if (!clean){
             printf("Gostaria de limpar a tela[y/N]? ");
             getchar();
+
             char c = getchar();
             if (c == 'y' || c == 'Y')
                 system("clear");
+
             clean = 0;
         }
     }
+
     destroi_vetores();
     return 0;
 }
