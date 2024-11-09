@@ -290,6 +290,7 @@ struct cont insertSort(int v[], int tam){
             c.comp += 2;
             v[j + 1] = v[j];
             j--;
+            c.trocas++;
         }
         c.comp += 2;
         v[j + 1] = chave;
@@ -314,7 +315,6 @@ struct cont selectionSort(int v[], int tam){
             }
             c.comp += 2;
         }
-        c.comp++;
         
         swap(&v[i], &v[min], &c);
     }

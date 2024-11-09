@@ -6,9 +6,9 @@
 #include <math.h>
 #include "algoritmos.h"
 
-#define MAX_SIZE 1024     //tamanho dos vetores que são alocados
+#define MAX_SIZE 1024      //tamanho dos vetores que são alocados
 #define MAX_NUM 2048      //numero maximo permitido no vetor
-#define VEZES 1000        //quantas vezes o algoritmo será executado
+#define VEZES 10000        //quantas vezes o algoritmo será executado
 #define MAX_SLOTS 4       //quantos espacos de vetor existem
 
 // defines para cores em strings
@@ -446,7 +446,7 @@ void imprime_opcoes(){
     printf(YEL"3 - Criar novo vetor aleatório  \n");
     printf(YEL"4 - Copiar vetor em outro espaço\n");
     printf(YEL"5 - Imprimir um intervalo       \n");
-    printf(BLU"6 - Esvaziar vetor              \n");
+    printf(YEL"6 - Esvaziar vetor              \n");
     printf(BLU"7 - Limpar tela                 \n");
     printf(RED "8 - Rodar %dx             \n" RESET, VEZES);
     printf("9 - Sair                        \n\n");
@@ -607,7 +607,7 @@ void faz_escolha(){
 
             while(!ok){
                 printf("\nQual vetor gostaria de copiar[0-%d]? ", MAX_SLOTS-1);
-                orig = get_answer(1, MAX_SLOTS - 1, 1);
+                orig = get_answer(0, MAX_SLOTS - 1, 1);
                 if (orig != -1 && orig != -2)
                     ok = 1;
             }
@@ -737,6 +737,8 @@ int main(){
             char c = getchar();
             if (c == 'y' || c == 'Y')
                 system("clear");
+            else 
+                printf("\n───────────────────────────────────────────────────────────────────────────────────\n");
 
             clean = 0;
         }
